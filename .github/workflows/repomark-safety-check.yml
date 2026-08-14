@@ -9,7 +9,6 @@ on:
         type: string
     secrets:
       KMS_KEY_ID:
-        description: "The KMS Key ID used for sealing"
         required: false
 
 jobs:
