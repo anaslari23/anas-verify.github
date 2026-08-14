@@ -8,8 +8,8 @@ on:
 
 jobs:
   repomark:
-    uses: anaslari23/anas-verify.github/.github/workflows/repomark-safety-check.yml@main
+    uses: ./.github/workflows/repomark-safety-check.yml
     with:
-      action: ${{ github.event_name == 'pull_request' && 'verify' || 'seal' }}
+      action: verify
     secrets:
       KMS_KEY_ID: ${{ secrets.KMS_KEY_ID }}
