@@ -1,0 +1,64 @@
+name: RepoMark Safety Check
+
+on:
+  workflow_call:
+    inputs:
+      action:
+        description: "Action to perform: 'verify' (for PRs) or 'seal' (for merges)"
+        required: true
+        type: string
+    secrets:
+      KMS_KEY_ID:
+        description: "The KMS Key ID used for sealing"
+        required: false
+
+jobs:
+  repomark:
+    name: RepoMark ${{ inputs.action }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC KMS authentication
+      contents: read  # Required to read the repo
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      # Install the RepoMark CLI globally (assuming you publish it to npm or a private registry)
+      # In a real environment, you might use a pre-built GitHub Action instead of installing via npm
+      - name: Install RepoMark
+        run: npm install -g @repomark/cli
+
+      # ---------------------------------------------------------
+      # ACTION: VERIFY (Run on Pull Requests)
+      # ---------------------------------------------------------
+      - name: Verify Provenance
+        if: inputs.action == 'verify'
+        run: |
+          echo "Running strict verification..."
+          repomark verify --strict
+          
+      # ---------------------------------------------------------
+      # ACTION: SEAL (Run on Push to Main)
+      # ---------------------------------------------------------
+      - name: Seal Codebase
+        if: inputs.action == 'seal'
+        env:
+          KMS_KEY_ID: ${{ secrets.KMS_KEY_ID }}
+        run: |
+          echo "Sealing codebase..."
+          repomark seal --dir . --signer kms --key-id "$KMS_KEY_ID" --claim verified-origin
+          
+      - name: Archive Sealed Provenance
+        if: inputs.action == 'seal'
+        uses: actions/upload-artifact@v4
+        with:
+          name: repomark-provenance
+          path: .repomark/
