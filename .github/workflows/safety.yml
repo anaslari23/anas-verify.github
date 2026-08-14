@@ -1,0 +1,15 @@
+name: RepoMark Enforcement
+
+on:
+  pull_request:
+    branches: [ "main", "master" ]
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  repomark:
+    uses: anaslari23/anas-verify.github/.github/workflows/repomark-safety-check.yml@main
+    with:
+      action: ${{ github.event_name == 'pull_request' && 'verify' || 'seal' }}
+    secrets:
+      KMS_KEY_ID: ${{ secrets.KMS_KEY_ID }}
