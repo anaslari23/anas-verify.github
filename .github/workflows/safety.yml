@@ -1,0 +1,13 @@
+name: RepoMark Enforcement
+
+on:
+  pull_request:
+    branches: [ "main", "master" ]
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  repomark:
+    uses: ./.github/workflows/repomark-safety-check.yml
+    with:
+      action: verify
