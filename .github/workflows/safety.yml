@@ -11,5 +11,3 @@ jobs:
     uses: ./.github/workflows/repomark-safety-check.yml
     with:
       action: verify
-    secrets:
-      KMS_KEY_ID: ${{ secrets.KMS_KEY_ID }}
